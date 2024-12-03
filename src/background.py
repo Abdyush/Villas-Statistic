@@ -18,7 +18,49 @@ def define_range(sheet_):
          pwv = sheet_['C50': column_letters + '53']
          categories = [(veg, 'VEG'), (vps, 'VPS'), (vig, 'VIG'), (fwv, 'FWV'), (pwv, 'PWV')]
          return categories
-         break
+      
+# Совершенная функция, определяющая диапазоны категорий вилл для отдельной страницы подходящая для обоих файлов
+def perfect_define_range(sheet, index_sheet, index_sheets):
+   # Определяем ряды начала и окончания диапазонов
+   ranges = {'veg': ['4001', '4012'],
+             'vps': ['5001', '5002'],
+             'vig': ['5003', '5005'],
+             'fwv': ['4013', '4028'],
+             'pwv': ['5006', '5009']}
+   if index_sheet == 11 and index_sheets == 0:
+       col = 0
+   else:
+       col = 1
+   for row in range(1, 70):
+       for key, value in ranges.items():
+           if str(sheet[row][col].value) in value:
+               i = value.index(str(sheet[row][col].value))
+               value[i] = row
+
+   # Определяем колонки окончания диапазонов
+   if index_sheet == 0 and index_sheets == 1:
+      end_column_letter = 'BL'
+   else:
+      for column in range(1, sheet.max_column):
+         if sheet[1][column].fill.start_color.index == '00000000' and type(sheet[1][column]) != MergedCell:
+            end_column_letter = str(sheet[1][column - 1].coordinate)[:-1]
+            break
+         
+   if index_sheet == 11 and index_sheets == 0:
+      start_column_letter = 'B'
+   else:
+      start_column_letter = 'C'
+         
+   veg = sheet[start_column_letter + str(ranges['veg'][0]): end_column_letter + str(ranges['veg'][1])]
+   vps = sheet[start_column_letter + str(ranges['vps'][0]): end_column_letter + str(ranges['vps'][1])]
+   vig = sheet[start_column_letter + str(ranges['vig'][0]): end_column_letter + str(ranges['vig'][1])]
+   fwv = sheet[start_column_letter + str(ranges['fwv'][0]): end_column_letter + str(ranges['fwv'][1])]
+   pwv = sheet[start_column_letter + str(ranges['pwv'][0]): end_column_letter + str(ranges['pwv'][1])]
+
+   categories = [(veg, 'VEG'), (vps, 'VPS'), (vig, 'VIG'), (fwv, 'FWV'), (pwv, 'PWV')]
+   return categories
+
+        
 
 
 # Функция настройки разметки первого листа excel
@@ -127,3 +169,6 @@ def prepare_second_table(sheet1):
                 cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
 
     set_border(sheet1, 'A1:S3') 
+
+
+
