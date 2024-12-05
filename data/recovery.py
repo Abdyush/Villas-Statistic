@@ -42,7 +42,16 @@ def separate_butler(cmt, other_comments):
 
 
 # Совершенная версия определения периода проживания виллы
-def perfect_count_days(sheets, index_sheet, category, number_row, number_column):
+def perfect_count_days(sheets, index_sheet, category, number_row, number_column, index_sheets, number_villa):
+    # Определяем год
+    if index_sheets == 0:
+        year = 2023
+    elif index_sheets == 1:
+        year = 2024
+    elif index_sheets == 2:
+        year = 2025
+    
+    # Определяем дату заезда
     flag = False
     start_month = None
     end_month = None
@@ -54,21 +63,22 @@ def perfect_count_days(sheets, index_sheet, category, number_row, number_column)
         day_arrival = sheets[index_sheet][let + '2'].value
         h = 12
         flag = True
-    arrival = datetime(hour=h, day=day_arrival, month=index_sheet+1, year=2023)
+    arrival = datetime(hour=h, day=day_arrival, month=index_sheet+1, year=year)
     if (arrival + timedelta(days=1)).month - arrival.month == 1:
         check_out = arrival
-        end_month = number_row
-        return [(arrival, check_out), ('end_month:', end_month)]
+        end_month = number_villa
+        return [(arrival, check_out), ('end_month:', number_villa)]
     else:
         if arrival.day == 1 and flag == False:
-            start_month = number_row
+            start_month = number_villa
 
+    # Определяем дату выезда
         j = number_column + 1
         check_out = arrival + timedelta(hours=12)
         while type(category[number_row][j]) == MergedCell:
             check_out += timedelta(hours=12)
             if (check_out + timedelta(hours=12)).month - check_out.month == 1 and type(category[number_row][j + 1]) == MergedCell:
-                end_month = number_row
+                end_month = number_villa
                 break
                 
             else:
@@ -76,7 +86,7 @@ def perfect_count_days(sheets, index_sheet, category, number_row, number_column)
 
     if start_month == None and end_month == None:
         return [(arrival, check_out), ('Количество суток:', (check_out - arrival).days)]
-    elif start_month != None and end_month == None and index_sheet == 0:
+    elif start_month != None and end_month == None and index_sheet == 0 and index_sheets == 0:
         return [(arrival, check_out), ('Количество суток:', (check_out - arrival).days)]
     elif start_month != None and end_month == None:
         return [(arrival, check_out), ('start_month:', start_month)]
@@ -104,3 +114,19 @@ def determine_rate(cell):
        return 'Апгрейд'
    else:
       return cell_fill
+
+
+# Функция определяющая номер виллы
+def define_number_villa(index_sheet, category, number_row, index_sheets, sheet):
+    # Определяем номер столбца
+    if index_sheet == 11 and index_sheets == 0:
+        col = 0
+    else:
+        col = 1
+    # Определяем номер ряда
+    row = int(str(category[number_row][0].coordinate)[1:])
+    # Извлекаем номер виллы
+    number_villa = sheet[row][col].value
+
+    return number_villa
+    
