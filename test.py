@@ -3,8 +3,9 @@ import sys
 sys.path.append(os.getcwd())
 
 import openpyxl
-from src.background import perfect_define_range
-from data.recovery import separate_butler, determine_rate, define_number_villa, perfect_count_days
+from data.collection import month_statistic, butlers
+from data.data_output import fill_first_table, fill_second_table
+from data.processing import prepare_dict, count_totals
 
 # Путь к файлу эксель с распределением вилл 
 FILE_PATH = '/home/user/Рабочий стол/StudyProject/villas/distribution/Villas occupancy 2023.xlsx' 
@@ -27,35 +28,38 @@ other_comments = []
 #Перебирая листы файла за каждый месяц, добавляем каждый лист в функцию получения статистики, таким образом, получаем статистику за год
 for sheets in list_sheet:
     for sheet in sheets:
-       categories = perfect_define_range(sheet, sheets.index(sheet), list_sheet.index(sheets))
-       for category in categories:
-          for row in category[0]:
-             for column in range(len(row)):
-                if row[column].value != None:
-                   try:
-                      cmt = row[column].comment.text
-                      but = separate_butler(cmt, other_comments)
-                      rate = determine_rate(row[column])
-                      number_villa = define_number_villa(index_sheet=(sheets.index(sheet)), category=(category[0]), 
-                                                      number_row=(category[0].index(row)), index_sheets=list_sheet.index(sheets), 
-                                                      sheet=sheet)
-                      days = perfect_count_days(sheets=sheets, index_sheet=sheets.index(sheet), category=category[0],
-                                          number_row=category[0].index(row), number_column=column, index_sheets=list_sheet.index(sheets), 
-                                          number_villa=number_villa)
-                      print(days)
-                      #print(row[column].value)
-                      #print(but)
-                      #print(rate)
-                      #print(number_villa)
-                      #print(days)
-                      #print()
-                      
-                      
-                   except:
-                      continue
+        month_statistic(sheets=sheets, sheet=sheet, sheet_index=sheets.index(sheet), sheets_index=list_sheet.index(sheets))
 
-
-
+prepare_dict(butlers)
 
 # Закрываем файл
-file.close()
+file.close()   
+
+generaly_dictionary = count_totals(butlers)
+
+# Путь к файлу со статистикой
+STATISTIC_FILE_PATH = '/home/user/Рабочий стол/StudyProject/villas/Statistic/Butlers_statistic.xlsx'
+
+# Открываем файл cо статистикой
+file_stat = openpyxl.load_workbook(STATISTIC_FILE_PATH)
+
+# Удаляем все листы из файла
+all_sheet = file_stat.sheetnames
+for sh in all_sheet:
+    file_stat.remove(file_stat[sh])
+
+# Создаем листы "Все виллы", "Статистика"
+sheet = file_stat.create_sheet("Все виллы")
+sheet1 = file_stat.create_sheet("Статистика")
+
+# Заполняем первую таблицу всеми данными по вилламgit
+fill_first_table(sheet, butlers)
+
+# Заполняем вторую таблицу статистикой
+fill_second_table(sheet1, generaly_dictionary)
+
+# Выводим в терминал "Готово!", сохраняем и закрываем файл
+print('Готово!')
+file_stat.save(STATISTIC_FILE_PATH)
+file_stat.close()
+

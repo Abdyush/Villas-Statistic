@@ -13,6 +13,7 @@ def fill_first_table(sheet, butlers):
     prepare_first_sheet(sheet)
     
     # Заполняем словарь
+    flag = True
     row = 2
     col = 3
     thin = Side(border_style="thin", color="000000")
@@ -31,6 +32,8 @@ def fill_first_table(sheet, butlers):
             cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
         
             for iterance in info:
+                if info.index(iterance) > 0:
+                    row += 1
                 cell = sheet.cell(row=row, column=2)
                 cell.value = guest
                 cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -38,16 +41,16 @@ def fill_first_table(sheet, butlers):
                 cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
                 col = 3
                 for param in iterance:
-                    if iterance.index(param) == 2:
+                    if type(param) == list:
                         cell = sheet.cell(row=row, column=col)
-                        cell.value = param[0][0].strftime('%d %B %Y')
+                        cell.value = param[0][0].strftime('%d.%m.%y')
                         cell.alignment = Alignment(horizontal="center", vertical="center")
                         cell.font = Font(name='Arial', size=12)
                         cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
                         col += 1
                     
                         cell = sheet.cell(row=row, column=col)
-                        cell.value = param[0][1].strftime('%d %B %Y')
+                        cell.value = param[0][1].strftime('%d.%m.%y')
                         cell.alignment = Alignment(horizontal="center", vertical="center")
                         cell.font = Font(name='Arial', size=12)
                         cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
@@ -60,7 +63,7 @@ def fill_first_table(sheet, butlers):
                         cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
                         col += 1
 
-                    elif iterance.index(param) == 1:
+                    elif iterance.index(param) == 2:
                         cell = sheet.cell(row=row, column=col)
                         cell.value = param
                         cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -68,16 +71,19 @@ def fill_first_table(sheet, butlers):
                         cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
 
                         if param == 'Открытый рынок':
-                            for j in range(2, 9):
+                            for j in range(2, 10):
                                 sheet.cell(row, j).fill = PatternFill('solid', fgColor='FFED7D31')
                         elif param == 'Сбер':
-                            for j in range(2, 9):
+                            for j in range(2, 10):
                                 sheet.cell(row, j).fill = PatternFill('solid', fgColor='FF00B050')
                         elif param == 'Комплиментарный тариф':
-                            for j in range(2, 9):
+                            for j in range(2, 10):
                                 sheet.cell(row, j).fill = PatternFill('solid', fgColor='FFFFFF00')
+                        elif param == 'Апгрейд':
+                            for j in range(2, 10):
+                                sheet.cell(row, j).fill = PatternFill('solid', fgColor='FFD0CECE')
                         else:
-                            for j in range(2, 9):
+                            for j in range(2, 10):
                                 sheet.cell(row, j).fill = PatternFill('solid', fgColor='00C0C0C0')       
                     
                         col += 1
@@ -89,13 +95,13 @@ def fill_first_table(sheet, butlers):
                         cell.font = Font(name='Arial', size=12)
                         cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
                         col += 1
-            
+                             
             row += 1
-    
+
         row += 1   
          
 
-# Функция заполнения второй таблиц словарем
+# Функция заполнения второй таблицы словарем
 def fill_second_table(sheet1, general_dictionary):
     # Настраиваем разметку таблицы
     prepare_second_table(sheet1=sheet1)
@@ -124,7 +130,7 @@ def fill_second_table(sheet1, general_dictionary):
                     cell.value = value
                     cell.alignment = Alignment(horizontal="center", vertical="center")
                     cell.font = Font(name='Arial', size=12)
-                    if col == 7 or col == 10 or col == 12 or col == 13 or col == 15 or col == 19 or col == 2:
+                    if col == 7 or col == 11 or col == 13 or col == 14 or col == 16 or col == 20 or col == 2:
                         cell.border = Border(top=thin, right=thin, bottom=thin)
                     else:
                         cell.border = Border(top=thin, bottom=thin)

@@ -12,8 +12,8 @@ def prepare_dict(butlers):
     for butler, villa in butlers.items():
         for guest, info in villa.items():
             for iterance in info:
-                if iterance[2][1][0] != 'Количество суток:':
-                    iterance[2][1] = ('Количество суток:', (iterance[2][0][1] - iterance[2][0][0]).days)
+                if iterance[3][1][0] != 'Количество суток:':
+                    iterance[3][1] = ('Количество суток:', (iterance[3][0][1] - iterance[3][0][0]).days)
 
 
 
@@ -29,15 +29,15 @@ def count_totals(butlers):
     stat_secon_shift = {}
     general_dictionary = {}
 
-    #reference_date = datetime.today()
-    reference_date = datetime(2023, 11, 18)
+    reference_date = datetime.today()
+    
     #reference_date = datetime(2023, 12, 5)
 
     for butler, villa in butlers.items():
         general_dictionary.setdefault(butler, [])
 
         veg, vps, vig, fwv, pwv = 0, 0, 0, 0, 0
-        open_market, sber, complimentary = 0, 0, 0
+        open_market, sber, complimentary, upgrade = 0, 0, 0, 0
         alone, twice = 0, 0
         total = 0
         planned_villas = 0
@@ -59,12 +59,13 @@ def count_totals(butlers):
                 open_market += iterance.count('Открытый рынок')
                 sber += iterance.count('Сбер')
                 complimentary += iterance.count('Комплиментарный тариф')
+                upgrade += iterance.count('Апгрейд')
 
                 alone += iterance.count('Один')
                 twice += iterance.count('2/2')
 
-                arrival = iterance[2][0][0]
-                check_out = iterance[2][0][1]
+                arrival = iterance[3][0][0]
+                check_out = iterance[3][0][1]
 
                 if check_out < reference_date:
                     last_check_out.append((check_out, guest))
@@ -110,7 +111,8 @@ def count_totals(butlers):
 
         general_dictionary[butler].append([{'Всего:': total - planned_villas}])
         general_dictionary[butler].append([{'VEG': veg}, {'FWV': fwv}, {'PWV': pwv}, {'VPS': vps}, {'VIG': vig}])
-        general_dictionary[butler].append([{'Открытый рынок': open_market}, {'Cбер': sber}, {'Комплиментарный тариф': complimentary}])
+        general_dictionary[butler].append([{'Открытый рынок': open_market}, {'Cбер': sber}, {'Апгрейд': upgrade}, 
+                                           {'Комплиментарный тариф': complimentary}])
         general_dictionary[butler].append([{'Один': alone}, {'2/2': twice}])
         general_dictionary[butler].append(time_resource)
 

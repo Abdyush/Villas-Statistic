@@ -1,3 +1,4 @@
+import re
 from openpyxl.cell import MergedCell
 from datetime import datetime, timedelta
 
@@ -8,7 +9,7 @@ from datetime import datetime, timedelta
 def separate_butler(cmt, other_comments):
     all_butlers = ['Булгаков', 'Волгузов', 'Волков', 'Гетало', 'Гончар', 'Дембицкий', 'Диденко', 'Ларионов', 'Онищук', 'Орлов', 
     'Ляшов', 'Сергеев', 'Тараев', 'Абдюшев', 'Люфт', 'Макухин', 'Мартынов', 'Марченко', 'Нечипуренко', 'Старенький', 'Стибельский', 'Тарабанов', 
-    'Федоренко', 'Черноштан', 'Шаповалов', 'Царенков', 'Потапов', 'Доронин', 'Мантуров', 'Мартынов', 'Саетов', 
+    'Федоренко', 'Черноштан', 'Шаповалов', 'Царенков', 'Потапов', 'Доронин', 'Мантуров', 'Саетов', 
     'Солодаев', 'Календжян', 'Буркеев', 'Карманов', 'Салединов', 'Тлашадзе', 'Соловьев', 'Дейнекин', 
     'Лесников', 'Гончаров', 'Попов', 'Пак', 'Курилко', 'Росихин']
     
@@ -18,11 +19,19 @@ def separate_butler(cmt, other_comments):
 
     but = []
     butler = []
+    # Убираем лишнее из комментария
+    if 'автор: мартынов' in cmt.lower():
+        cmt = cmt[:cmt.lower().index('автор: мартынов')]
+    elif 'автор мартынов' in cmt.lower():
+        cmt = cmt[:cmt.lower().index('автор мартынов')]
+
     for name in all_butlers:
-        if (name == 'Федоренко' and name.lower() in cmt.lower() and 'Н' in cmt) or (name == 'Мартынов' and name.lower() in cmt.lower() and 'Л' in cmt):
+        if (name == 'Федоренко' and name.lower() in cmt.lower() and 'Н' in cmt) or ((name == 'Мартынов' and name.lower() in cmt.lower()) and 'Л' in cmt or 'Алексей' in cmt):
             continue
         else: 
             if name.lower() in cmt.lower():
+                if name == 'Солодаев':
+                    name = 'Ляшов'
                 but.append(name)
     if but == []:
         other_comments.append(cmt)
@@ -43,15 +52,22 @@ def separate_butler(cmt, other_comments):
 
 # Совершенная версия определения периода проживания виллы
 def perfect_count_days(sheets, index_sheet, category, number_row, number_column, index_sheets, number_villa):
+
     # Определяем год
-    if index_sheets == 0:
+    if index_sheets == 0 and index_sheet <= 11:
         year = 2023
-    elif index_sheets == 1:
+    elif index_sheets == 1 and index_sheet <= 11 or (index_sheets == 0 and index_sheet == 12):
         year = 2024
-    elif index_sheets == 2:
+    elif index_sheets == 2 or (index_sheets == 1 and index_sheet == 12):
         year = 2025
-    
-    # Определяем дату заезда
+
+    # Определяем месяц
+    if index_sheet == 12:
+        month = 1
+    else:
+        month = index_sheet + 1
+
+    # Определяем день
     flag = False
     start_month = None
     end_month = None
@@ -63,7 +79,9 @@ def perfect_count_days(sheets, index_sheet, category, number_row, number_column,
         day_arrival = sheets[index_sheet][let + '2'].value
         h = 12
         flag = True
-    arrival = datetime(hour=h, day=day_arrival, month=index_sheet+1, year=year)
+
+    # Формируем дату заезда
+    arrival = datetime(hour=h, day=day_arrival, month=month, year=year)
     if (arrival + timedelta(days=1)).month - arrival.month == 1:
         check_out = arrival
         end_month = number_villa
@@ -73,16 +91,15 @@ def perfect_count_days(sheets, index_sheet, category, number_row, number_column,
             start_month = number_villa
 
     # Определяем дату выезда
-        j = number_column + 1
-        check_out = arrival + timedelta(hours=12)
-        while type(category[number_row][j]) == MergedCell:
-            check_out += timedelta(hours=12)
-            if (check_out + timedelta(hours=12)).month - check_out.month == 1 and type(category[number_row][j + 1]) == MergedCell:
-                end_month = number_villa
-                break
-                
-            else:
-                j += 1
+    j = number_column + 1
+    check_out = arrival + timedelta(hours=12)
+    while type(category[number_row][j]) == MergedCell:
+        check_out += timedelta(hours=12)
+        if ((check_out + timedelta(hours=12)).month - check_out.month == 1 or (check_out + timedelta(hours=12)).month - check_out.month == -11) and type(category[number_row][j + 1]) == MergedCell:
+            end_month = number_villa
+            break             
+        else:
+            j += 1
 
     if start_month == None and end_month == None:
         return [(arrival, check_out), ('Количество суток:', (check_out - arrival).days)]
@@ -100,8 +117,8 @@ def perfect_count_days(sheets, index_sheet, category, number_row, number_column,
 def determine_rate(cell):
    open_market = ['FFED7D31']
    complimentary = ['FFFFFF00']
-   sber = ['FF00B050']
-   upgrade = ['FFD0CECE', 'FFD9D9D9', 'FFE7E6E6']
+   sber = ['FF00B050', 'FF70AD47']
+   upgrade = ['FFD0CECE', 'FFD9D9D9', 'FFE7E6E6', 'FFFF9933', 'FFFF9933', 'FFBFBFBF']
 
    cell_fill = cell.fill.start_color.index #Получаем цвет ячейки
    if cell_fill in open_market:
@@ -130,3 +147,18 @@ def define_number_villa(index_sheet, category, number_row, index_sheets, sheet):
 
     return number_villa
     
+
+# Функция обработки фамилий гостя
+def process_name_guest(name):
+    # Преверяем есть ли цифры в строке, и убираем если есть
+    m = re.search(r'\d', name)
+    if m != None and (name[m.start() - 1] == ' ' or name[m.start() - 1] == '-'):
+        name = name[:m.start() - 1]
+
+    # Форматируем строку с заглавной буквы
+    if name.isalpha():
+        name = name.title()
+
+    return name
+
+
