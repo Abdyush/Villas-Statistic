@@ -82,7 +82,7 @@ def perfect_count_days(sheets, index_sheet, category, number_row, number_column,
 
     # Формируем дату заезда
     arrival = datetime(hour=h, day=day_arrival, month=month, year=year)
-    if (arrival + timedelta(days=1)).month - arrival.month == 1:
+    if (arrival + timedelta(days=1)).month - arrival.month == 1 or (arrival + timedelta(days=1)).month - arrival.month == -11:
         check_out = arrival
         end_month = number_villa
         return [(arrival, check_out), ('end_month:', number_villa)]
@@ -115,10 +115,10 @@ def perfect_count_days(sheets, index_sheet, category, number_row, number_column,
 
 # Функция, определяющая тариф
 def determine_rate(cell):
-   open_market = ['FFED7D31']
+   open_market = ['FFED7D31', 'FFFF9933', 'FFFF6600']
    complimentary = ['FFFFFF00']
    sber = ['FF00B050', 'FF70AD47']
-   upgrade = ['FFD0CECE', 'FFD9D9D9', 'FFE7E6E6', 'FFFF9933', 'FFFF9933', 'FFBFBFBF']
+   upgrade = ['FFD0CECE', 'FFD9D9D9', 'FFE7E6E6', 'FFBFBFBF']
 
    cell_fill = cell.fill.start_color.index #Получаем цвет ячейки
    if cell_fill in open_market:
