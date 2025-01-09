@@ -62,6 +62,50 @@ def perfect_define_range(sheet, index_sheet, index_sheets):
    categories = [(veg, 'VEG'), (vps, 'VPS'), (vig, 'VIG'), (fwv, 'FWV'), (pwv, 'PWV')]
    return categories
 
+# Совершенная функция, определяющая диапазоны категорий вилл для отдельной страницы подходящая для обоих файлов
+def perfect_perfect_define_range(sheet, index_sheet, index_sheets):
+   diap = sheet.calculate_dimension()
+   print(diap)
+   print(type(diap))
+
+   # Определяем ряды начала и окончания диапазонов
+   ranges = {'veg': ['4001', '4012'],
+             'vps': ['5001', '5002'],
+             'vig': ['5003', '5005'],
+             'fwv': ['4013', '4028'],
+             'pwv': ['5006', '5009']}
+   
+   # Определяем колонку
+   for row in range(3, 8):
+       for col in range(3):
+           if str(sheet[row][col].value) == '4001':
+               column = col
+               break
+
+
+   for row in range(1, 70):
+       for key, value in ranges.items():
+           if str(sheet[row][column].value) in value:
+               i = value.index(str(sheet[row][column].value))
+               value[i] = row
+
+   # Определяем колонки окончания диапазонов
+   for column in range(40, 70):
+       if type(sheet[1][column]) != MergedCell:
+           end_column_letter = str(sheet[1][column - 1].coordinate)[:-1]
+           break
+         
+   start_column_letter = 'B'
+        
+   veg = sheet[start_column_letter + str(ranges['veg'][0]): end_column_letter + str(ranges['veg'][1])]
+   vps = sheet[start_column_letter + str(ranges['vps'][0]): end_column_letter + str(ranges['vps'][1])]
+   vig = sheet[start_column_letter + str(ranges['vig'][0]): end_column_letter + str(ranges['vig'][1])]
+   fwv = sheet[start_column_letter + str(ranges['fwv'][0]): end_column_letter + str(ranges['fwv'][1])]
+   pwv = sheet[start_column_letter + str(ranges['pwv'][0]): end_column_letter + str(ranges['pwv'][1])]
+
+   categories = [(veg, 'VEG'), (vps, 'VPS'), (vig, 'VIG'), (fwv, 'FWV'), (pwv, 'PWV')]
+   return categories
+
 
 # Функция определяющая правильное склонение существительного
 def choose_plural(amount, declensions): 

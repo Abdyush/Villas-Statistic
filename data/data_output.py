@@ -17,6 +17,8 @@ def new_fill_first_table(sheet, butlers):
     col = 3
     thin = Side(border_style="thin", color="000000")
     for butler, villas in butlers.items():
+        if villas == {}:
+            continue
         ran = f'B{row}:I{row}'
         sheet.merge_cells(ran)
         cell = sheet.cell(row=row, column=2)

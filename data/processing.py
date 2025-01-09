@@ -1,5 +1,7 @@
 from datetime import datetime
+import calendar
 import locale
+import pickle
 
 
 # Устанавливаем Русскую локализацию для datetime
@@ -11,6 +13,8 @@ locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 # Поиск в словаре необработанных периодов проживания вилл, и приведение их к единообразному результату
 def new_prepare_dict(butlers):
     for butler, time in butlers.items():
+        if time == []:
+            continue
         for guest, villa in time.items():
             for g, info in villa.items():
                 for iterance in info:
@@ -21,18 +25,26 @@ def new_prepare_dict(butlers):
 # Функция определения сезонности
 def detrmine_season():
     year = datetime.today().year
+    if calendar.isleap(year) == True:
+        d = 29
+    else:
+        d = 28
     seasons = {'Весна': [(datetime(year=year, month=3, day=1), datetime(year=year, month=5, day=31))],
                'Лето': [(datetime(year=year, month=6, day=1), datetime(year=year, month=8, day=31))],                       
                'Осень': [(datetime(year=year, month=9, day=1), datetime(year=year, month=11, day=30))],
                'Зима': [(datetime(year=year, month=12, day=1), datetime(year=year, month=12, day=31)),
-                        (datetime(year=year, month=1, day=1), datetime(year=year, month=2, day=29))]} 
+                        (datetime(year=year, month=1, day=1), datetime(year=year, month=2, day=d))]} 
                                 
     
     for season, periods in seasons.items():
         for period in periods:
             if period[0] <= datetime.today() <= period[1]:
                 if season == 'Зима':
-                    return season, datetime(year=year, month=12, day=1), datetime(year=year + 1, month=2, day=28)
+                    if datetime.today().month == 12:
+                        return season, datetime(year=year, month=12, day=1), datetime(year=year + 1, month=2, day=d)
+                    else:
+                        return season, datetime(year=year - 1, month=12, day=1), datetime(year=year, month=2, day=d)
+
                 else:
                     return season, period[0], period[1]
 
@@ -56,11 +68,29 @@ def count_total_period_days(arrival, check_out, start_period, end_period, villa_
 
 # Функция подсчета итогов с подсчетом количества суток за сезон
 def new_new_count_totals(butlers):
-    first_shift = ['Булгаков', 'Волгузов', 'Волков', 'Гетало', 'Гончар', 'Дембицкий', 'Диденко', 'Ларионов', 'Онищук', 'Орлов', 
-    'Ляшов', 'Сергеев', 'Тараев']
+    #first_shift = ['Булгаков', 'Волгузов', 'Волков', 'Гетало', 'Гончар', 'Дембицкий', 'Диденко', 'Ларионов', 'Онищук', 'Орлов', 
+    #'Ляшов', 'Сергеев', 'Тараев']
 
-    second_shift = ['Абдюшев', 'Люфт', 'Макухин', 'Мартынов', 'Марченко', 'Нечипуренко', 'Старенький', 'Стибельский', 'Тарабанов', 
-    'Федоренко', 'Черноштан', 'Шаповалов']
+    #second_shift = ['Абдюшев', 'Люфт', 'Макухин', 'Мартынов', 'Марченко', 'Нечипуренко', 'Старенький', 'Стибельский', 'Тарабанов', 
+    #'Федоренко', 'Черноштан', 'Шаповалов']
+
+     # open a pickle file
+    filename1 = 'all_butlers.pk'
+    filename2 = 'selected_butlers.pk'
+    
+    
+    # load your data back to memory when you need it
+    with open(filename2, 'rb') as fi:
+        sel_but = pickle.load(fi)
+
+    if sel_but != []:
+        first_shift = sel_but[0]
+        second_shift = sel_but[1]
+    else:
+        with open(filename1, 'rb') as fi:
+            all_but = pickle.load(fi)
+        first_shift = all_but[0]
+        second_shift = all_but[1]
 
     
     general_dictionary = {'first_shift': {},
@@ -76,6 +106,18 @@ def new_new_count_totals(butlers):
             shift = 'second_shift'
         
         general_dictionary[shift].setdefault(butler, [])
+
+        if villas == {}:
+            general_dictionary[shift][butler] = [[{'Всего:': 0}], [{'Всего дней:': 0}],
+                                                 [{'VEG': 0}, {'FWV': 0}, {'PWV': 0}, {'VPS': 0}, {'VIG': 0}],
+                                                 [{'Открытый рынок': 0}, {'Cбер': 0}, {'Апгрейд': 0}, 
+                                                  {'Комплиментарный тариф': 0}],
+                                                 [{'Один': 0}, {'2/2': 0}],
+                                                 [{'Статус': 'Свободен', 'Дата последнего выезда:': '-', 'Гость:': '-'}, 
+                                                  {'Планируемые заезды': '-'},
+                                                  {'Дата ближайшего заезда': '-', 'Дней до заезда:': '-', 'Гость:': '-'}]]
+            continue
+
 
         veg, vps, vig, fwv, pwv = 0, 0, 0, 0, 0
         open_market, sber, complimentary, upgrade = 0, 0, 0, 0

@@ -1,12 +1,36 @@
 from datetime import datetime
-from data.recovery import separate_butler, determine_rate, perfect_count_days, define_number_villa, process_name_guest
-from src.background import perfect_define_range
+import pickle
+from data.recovery import separate_butler, determine_rate, perfect_count_days, define_number_villa, process_name_guest, determine_category
+from src.background import perfect_perfect_define_range
 
 
 # ------------------------------ ОСНОВНЫЕ ФУНКЦИИ ---------------------------------------------
 
 # Создаем словарь с будущей статистикой батлеров
+
 butlers = {}
+
+def fill_dict(butlers):
+    # open a pickle file
+    filename1 = 'all_butlers.pk'
+    filename2 = 'selected_butlers.pk'
+    
+    
+    # load your data back to memory when you need it
+    with open(filename2, 'rb') as fi:
+        sel_but = pickle.load(fi)
+
+    if sel_but != []:
+        present_butlers = sel_but[0]
+        present_butlers.extend(sel_but[1])
+    else:
+        with open(filename1, 'rb') as fi:
+            all_but = pickle.load(fi)
+        present_butlers = all_but[0]
+        present_butlers.extend(all_but[1])
+
+    for name in present_butlers:
+        butlers[name] = {}
 
 
 # Эксперементальная функция с подсчетом дней
@@ -85,7 +109,7 @@ other_comments = []
 # Функция получения статистики месяца с учетом времени заезда виллы
 def new_month_statistic(sheets, sheet, sheet_index, sheets_index):
     reference_date = datetime.today()
-    categories = perfect_define_range(sheet, sheet_index, sheets_index)
+    categories = perfect_perfect_define_range(sheet, sheet_index, sheets_index)
     for category in categories:
         for row in category[0]:
             for column in range(len(row)):
@@ -121,3 +145,68 @@ def new_month_statistic(sheets, sheet, sheet_index, sheets_index):
                         continue
 
 
+
+# Функция получения статистики месяца с учетом времени заезда виллы (совершенная)
+def perfect_new_month_statistic(sheets, sheet, sheet_index, sheets_index):
+    reference_date = datetime.today()
+    diap = sheet.calculate_dimension()
+    diapazone = sheet[diap]
+
+
+    for row in diapazone:
+        for column in range(len(row)):
+            if row[column].value != None:
+                try:
+                    cmt = row[column].comment.text
+                    if separate_butler(cmt, other_comments) == None:
+                        continue
+                    else:
+                        shift, but = separate_butler(cmt, other_comments)
+                        guest = process_name_guest(name=row[column].value)                       
+                                        
+                        rate = determine_rate(row[column])                         
+                        number_villa = define_number_villa(index_sheet=sheet_index, category=diapazone, 
+                                                    number_row=(diapazone.index(row)), index_sheets=sheets_index, 
+                                                    sheet=sheet)
+                        categ = determine_category(number_villa) 
+                        days = perfect_count_days(sheets=sheets, index_sheet=sheet_index, category=diapazone,
+                                        number_row=diapazone.index(row), number_column=column, index_sheets=sheets_index, 
+                                        number_villa=number_villa)
+                        
+
+                        for butler in but:
+                            
+                            if days[0][0] > reference_date:
+                                time = 'future'                            
+                            else:
+                                time = 'present'
+                                
+                            perfect_new_generate_statistics(butlers=butlers, time=time, butler=butler, guest=guest, categ=categ, 
+                                                    rate=rate, days=days, shift=shift, number_villa=number_villa)                                      
+        
+                except:
+                    continue
+
+
+# Функция, формирующая всю статистику в словарь, делящая виллы на прошедкшие и будующие (новая)
+def perfect_new_generate_statistics(butlers, time, butler, guest, categ, rate, days, shift, number_villa):
+    
+    if time not in butlers[butler]:
+        if time == 'future' and days[1][0] == 'start_month:':
+            time = 'present'
+            count_final_days(butlers, butler, time, guest, days, categ, number_villa, rate, shift)
+        else:
+            butlers[butler].setdefault(time, {guest: [[categ, number_villa, rate, days, shift]]})
+    else:
+        if guest in butlers[butler][time]:
+            count_final_days(butlers, butler, time, guest, days, categ, number_villa, rate, shift)
+        else:
+            if time == 'future' and days[1][0] == 'start_month:':
+                time = 'present'
+                count_final_days(butlers, butler, time, guest, days, categ, number_villa, rate, shift)
+            else:
+                butlers[butler][time].setdefault(guest, [[categ, number_villa, rate, days, shift]])
+
+    
+    
+other_comments = []

@@ -1,4 +1,5 @@
 import re
+import pickle
 from openpyxl.cell import MergedCell
 from datetime import datetime, timedelta
 
@@ -13,9 +14,27 @@ def separate_butler(cmt, other_comments):
     'Солодаев', 'Календжян', 'Буркеев', 'Карманов', 'Салединов', 'Тлашадзе', 'Соловьев', 'Дейнекин', 
     'Лесников', 'Гончаров', 'Попов', 'Пак', 'Курилко', 'Росихин']
     
-    present_butlers = ['Булгаков', 'Волгузов', 'Волков', 'Гетало', 'Гончар', 'Дембицкий', 'Диденко', 'Онищук', 'Орлов', 
-    'Ляшов', 'Сергеев', 'Тараев', 'Абдюшев', 'Люфт', 'Макухин', 'Мартынов', 'Марченко', 'Нечипуренко', 'Стибельский', 'Тарабанов', 
-    'Федоренко', 'Черноштан', 'Шаповалов']
+    #present_butlers = ['Булгаков', 'Волгузов', 'Волков', 'Гетало', 'Гончар', 'Дембицкий', 'Диденко', 'Онищук', 'Орлов', 
+    #'Ляшов', 'Сергеев', 'Тараев', 'Абдюшев', 'Люфт', 'Макухин', 'Мартынов', 'Марченко', 'Нечипуренко', 'Стибельский', 'Тарабанов', 
+    #'Федоренко', 'Черноштан', 'Шаповалов']
+
+    # open a pickle file
+    filename1 = 'all_butlers.pk'
+    filename2 = 'selected_butlers.pk'
+    
+    
+    # load your data back to memory when you need it
+    with open(filename2, 'rb') as fi:
+        sel_but = pickle.load(fi)
+
+    if sel_but != []:
+        present_butlers = sel_but[0]
+        present_butlers.extend(sel_but[1])
+    else:
+        with open(filename1, 'rb') as fi:
+            all_but = pickle.load(fi)
+        present_butlers = all_but[0]
+        present_butlers.extend(all_but[1])
 
     but = []
     butler = []
@@ -162,3 +181,17 @@ def process_name_guest(name):
     return name
 
 
+
+# Функция определяющая категорию
+def determine_category(number_villa):
+    categories = {'VEG': ['4001', '4002', '4003', '4004', '4005', '4006', '4007', '4008', '4009', '4010', '4011', '4012'],
+                  'VPS': ['5001', '5002'],
+                  'VIG': ['5003', '5004', '5005'],
+                  'FWV': ['4013', '4014', '4015', '4016', '4017', '4018', '4019', '4020', 
+                          '4021', '4022', '4023', '4024', '4025', '4026', '4027', '4028'],
+                  'PWV': ['5006', '5007', '5008', '5009']}
+    
+    for category, numbers in categories.items():
+        if str(number_villa) in numbers:
+            return category
+                 
