@@ -133,7 +133,9 @@ def main(page: ft.Page):
     
         def main_work(e, last_year, this_year):
             nonlocal result
+            btn.disabled = True
             target_folder = 'distribution'
+            
             try:
                 # Путь к файлу эксель с распределением вилл 
                 #FILE_PATH = '/home/user/Рабочий стол/StudyProject/villas/distribution/Villas occupancy 2023.xlsx' 
@@ -143,10 +145,14 @@ def main(page: ft.Page):
                 #FILE_24_PATH = '/home/user/Рабочий стол/StudyProject/villas/distribution/Villas occupancy 2024.xlsx'
                 FILE_24_PATH = copy_file_to_folder(this_year, target_folder)
 
+
                 # Открываем файл
                 file = openpyxl.open(FILE_PATH)
                 file2 = openpyxl.open(FILE_24_PATH)
 
+                loading1.visible = False
+                loading2.visible = True
+                page.update()
 
                 # определяем список со всеми доступными страницами файла
                 sheets = file.worksheets
@@ -170,13 +176,13 @@ def main(page: ft.Page):
                 # Закрываем файлы
                 file.close()  
                 file2.close()
+                
 
                 # Удаляем файлы
                 os.remove(FILE_PATH)
                 os.remove(FILE_24_PATH)
 
                 generaly_dictionary = coef_new_count_totals(butlers)
-                print(generaly_dictionary)
 
                 # open a pickle file
                 filename = 'selected_butlers.pk'
@@ -211,8 +217,8 @@ def main(page: ft.Page):
                 print('Готово!')
                 file_stat.save(STATISTIC_FILE_PATH)
                 file_stat.close()
-                result.color = 'green'
-                result.value = 'ГОТОВО!'
+                cancel_button_1.disabled = False
+                cancel_button_2.disabled = False
                 btn.visible = False
                 open_file_btn.disabled = False
                 
@@ -240,14 +246,23 @@ def main(page: ft.Page):
 
 
         def start_programm(e):
+            loading1.visible = True
+            cancel_button_1.disabled = True
+            cancel_button_2.disabled = True
+            btn.visible = False
+            #loading.visible = True
+            page.update()
             pb.visible = True
-            btn.disabled = True
+            pb.update()
+            
             file_1 = paths['one']
             file_2 = paths['two']
             main_work(e, file_1, file_2)
-            pb.visible = False
-            btn.disabled = False
+            #pb.visible = False
             open_file_btn.visible = True
+            pb.visible = False
+            loading2.visible = False
+            pb.update()
             page.update()
             
 
@@ -288,19 +303,23 @@ def main(page: ft.Page):
                                 style=ft.ButtonStyle(text_style=ft.TextStyle(size=17)), disabled=True)
         
         # Кнопка открытия файла со статистикой
-        open_file_btn = ft.FilledButton(text='Открыть статистику', icon=ft.Icons.FILE_OPEN_ROUNDED, width=300, height=45, 
+        open_file_btn = ft.FilledButton(text='Открыть статистику', icon=ft.Icons.FILE_OPEN_ROUNDED, width=400, height=55, 
                                         on_click=open_stat_file, style=ft.ButtonStyle(text_style=ft.TextStyle(size=17)), visible=False)
         
 
         pb = ft.ProgressBar(width=400, visible=False)
+        loading1 = ft.Text(value="Читаю файлы...", theme_style=ft.TextThemeStyle.TITLE_MEDIUM, visible=False)
+        loading2 = ft.Text(value="Подвожу итоги...", theme_style=ft.TextThemeStyle.TITLE_MEDIUM, visible=False)
         
 
         #------------------------------------------------Ряды и контейнеры-----------------------------------------------------------------
         # Первый ряд содержит кнопку перехода к настройкам
-        first_row = ft.Row(controls=[settings_btn], alignment=ft.MainAxisAlignment.END)
+        first_row = ft.Row(controls=[settings_btn, ft.Container(width=10)], alignment=ft.MainAxisAlignment.END)
         
         # Второй ряд содержит колонку, внутри которой первым рядом идет кнопка запуска, вторым - текст с результатом и кнопка открытия файла
         second_row = ft.Row(controls=[ft.Column(controls=[btn,
+                                                          loading1,
+                                                          loading2,
                                                           pb,
                                                           ft.Row(controls=[result, open_file_btn])],
                                                           alignment=ft.MainAxisAlignment.END)],
@@ -309,8 +328,12 @@ def main(page: ft.Page):
                                                 )
         
         # Третий и четвертый ряд содержат кнопки: выбор файла, путь файла, отмена, подтвердить
-        third_row = ft.Row(controls=[select_button_1, file_path_label_1, cancel_button_1, confirm_button_1])
-        fourth_row = ft.Row(controls=[select_button_2, file_path_label_2, cancel_button_2, confirm_button_2])
+        third_row = ft.Row(controls=[ft.Container(width=10), 
+                                     select_button_1, file_path_label_1, cancel_button_1, confirm_button_1,
+                                     ft.Container(width=10)])
+        fourth_row = ft.Row(controls=[ft.Container(width=10), 
+                                      select_button_2, file_path_label_2, cancel_button_2, confirm_button_2,
+                                      ft.Container(width=10)])
 
         page.add(first_row, second_row, third_row, fourth_row)
 
@@ -370,7 +393,7 @@ def main(page: ft.Page):
             text_field = ft.TextField(value=name, width=200, on_change=lambda e: update_employee_name(e, row), disabled=True, 
                                       color = ft.Colors.with_opacity(1, ft.Colors.PRIMARY), text_align=ft.TextAlign.CENTER, 
                                       text_style=ft.TextStyle(size=17))
-            del_icon = ft.IconButton(ft.Icons.DELETE, on_click=lambda e: delete_employee(row, shift_column), visible=False)
+            del_icon = ft.IconButton(ft.Icons.DIRECTIONS_RUN_OUTLINED, on_click=lambda e: delete_employee(row, shift_column), visible=False)
             row = ft.Row(controls=[text_field, checkbox, del_icon], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
             list_textfields.append(text_field)
             list_del_icons.append(del_icon)
@@ -425,7 +448,9 @@ def main(page: ft.Page):
         def confirm_changes(e):
             # Подтверждаем изменения и возвращаем обновленные списки
             updated_first_shift = [row.controls[0].value for row in first_shift_list.controls]
+            updated_first_shift = sorted(updated_first_shift)
             updated_second_shift = [row.controls[0].value for row in second_shift_list.controls]
+            updated_second_shift = sorted(updated_second_shift)
             all_but = [updated_first_shift, updated_second_shift]
             with open(filename1, 'wb') as fi:
             # dump your data into the file
@@ -534,12 +559,12 @@ def main(page: ft.Page):
 
         #-------------------------------------------------------Ряды и контейнеры-------------------------------------------------------------
         # Первый ряд содержит кнопку возвращения на первую страницу в правом углу
-        first_row = ft.Row(controls=[count_stat_btn], alignment=ft.MainAxisAlignment.END)
-        page.add(first_row)
+        first_row = ft.Row(controls=[count_stat_btn, ft.Container(width=15)], alignment=ft.MainAxisAlignment.END)
+        
         # Второй ряд содержит текст "Список сотрудников по сменам"
         second_row = ft.Row(controls=[ft.Text("СПИСКИ БАТЛЕРОВ ПО СМЕНАМ", theme_style=ft.TextThemeStyle.TITLE_MEDIUM)], 
                             alignment=ft.MainAxisAlignment.CENTER)
-        page.add(second_row)
+        
         # Третий ряд содержит три колонки, по бокам - списки сотрудников, по середине - кнопки
         buttons_column = ft.Column(controls=[ft.Row(controls=[enable_button, cancel_button, confirm_button]),
                                              ft.Row(controls=[add_first_shift_button, employee_input, add_second_shift_button]),
@@ -556,9 +581,8 @@ def main(page: ft.Page):
                                                horizontal_alignment=ft.CrossAxisAlignment.CENTER)],
                            alignment=ft.MainAxisAlignment.SPACE_EVENLY,
                            vertical_alignment=ft.CrossAxisAlignment.START)
-        page.add(third_row)
 
-
+        page.add(first_row, second_row, third_row)
 
      
     # Функция для переключения на первую страницу
