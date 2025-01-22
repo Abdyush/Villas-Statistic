@@ -163,10 +163,11 @@ def prepare_second_table(sheet1):
     sheet1.merge_cells('B2:H2')
     sheet1.merge_cells('I2:L2')
     sheet1.merge_cells('M2:N2')
-    sheet1.merge_cells('O2:U2')
+    sheet1.merge_cells('O2:O3')
+    sheet1.merge_cells('P2:V2')
 
     # Вписываем названия столбцов
-    sheet1['A1'] = f'{season} {start_period.strftime("%d.%m.%y")}-{end_period.strftime("%d.%m.%y")}'
+    sheet1['A1'] = f'Расчетный период: {start_period.strftime("%d.%m.%y")}-{end_period.strftime("%d.%m.%y")} - {season}'
     sheet1['I1'] = 'Статистика'
     sheet1['A2'] = 'Батлер'
 
@@ -183,15 +184,17 @@ def prepare_second_table(sheet1):
     sheet1['M2'] = 'Сменность'
     sheet1['M3'] = 'Один'
     sheet1['N3'] = '2/2'
+    
+    sheet1['O2'] = 'Коэфф.'
 
-    sheet1['O2'] = 'Занятость'
-    sheet1['O3'] = 'Статус:'
-    sheet1['P3'] = 'Дата выезда:'
-    sheet1['Q3'] = 'Гость:'
-    sheet1['R3'] = 'Планируемые заезды:'
-    sheet1['S3'] = 'Ближайший заезд:'
-    sheet1['T3'] = 'Дней до заезда:'
-    sheet1['U3'] = 'Гость:'
+    sheet1['P2'] = 'Занятость'
+    sheet1['P3'] = 'Статус:'
+    sheet1['Q3'] = 'Дата выезда:'
+    sheet1['R3'] = 'Гость:'
+    sheet1['S3'] = 'Планируемые заезды:'
+    sheet1['T3'] = 'Ближайший заезд:'
+    sheet1['U3'] = 'Дней до заезда:'
+    sheet1['V3'] = 'Гость:'
 
     sheet1['I3'].fill = PatternFill('solid', fgColor='FFED7D31')
     sheet1['J3'].fill = PatternFill('solid', fgColor='FF00B050')
@@ -202,18 +205,19 @@ def prepare_second_table(sheet1):
     sheet1.column_dimensions['A'].width = 20
     sheet1.column_dimensions['B'].width = 8
     sheet1.column_dimensions['C'].width = 8
-    for col in range(3, 12):
+    for col in range(3, 13):
         letter = (sheet1[1][col].coordinate)[0]
         sheet1.column_dimensions[letter].width = 5
     sheet1.column_dimensions['M'].width = 8
     sheet1.column_dimensions['N'].width = 8
-    sheet1.column_dimensions['O'].width = 15
-    sheet1.column_dimensions['P'].width = 17
-    sheet1.column_dimensions['Q'].width = 22
-    sheet1.column_dimensions['R'].width = 38
-    sheet1.column_dimensions['S'].width = 22 
-    sheet1.column_dimensions['T'].width = 20
-    sheet1.column_dimensions['U'].width = 20   
+    sheet1.column_dimensions['O'].width = 10
+    sheet1.column_dimensions['P'].width = 15
+    sheet1.column_dimensions['Q'].width = 17
+    sheet1.column_dimensions['R'].width = 22
+    sheet1.column_dimensions['S'].width = 38
+    sheet1.column_dimensions['T'].width = 22 
+    sheet1.column_dimensions['U'].width = 20
+    sheet1.column_dimensions['V'].width = 20   
 
     # Настройка высоты ячеек 
     for i in range(1, 310):
@@ -221,7 +225,7 @@ def prepare_second_table(sheet1):
 
     # Настраиваем размер, шрифт, расположение текста шапки
     for row in range(1, 4):
-        for column in range(21):
+        for column in range(22):
             sheet1[row][column].font = Font(name='Arial', size=12, bold=True)
             sheet1[row][column].alignment = Alignment(horizontal="center", vertical="center")
 
@@ -232,7 +236,7 @@ def prepare_second_table(sheet1):
             for cell in row:
                 cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
 
-    set_border(sheet1, 'A1:U3') 
+    set_border(sheet1, 'A1:V3') 
 
 
 

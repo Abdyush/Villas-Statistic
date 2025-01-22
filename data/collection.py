@@ -44,9 +44,15 @@ def count_final_days(butlers, butler, time, guest, days, categ, number_villa, ra
                 number = villa[3][1][1]
                 month_villa = villa[3][0][0].month
                 # Проверяем не является ли переданная функцию вилла копией уже имеющейся вилле в словаре
-                if number_villa == villa[1] and rate == villa[2] and shift == villa[4] and days[0][1] == villa[3][0][1]:
-                    flag = True
-                    break
+                if number_villa == villa[1] and rate == villa[2] and shift == villa[4]:
+                    if days[0][1] == villa[3][0][1]: 
+                        flag = True
+                        break
+                    elif villa[3][0][1] > days[0][0]:
+                        days = [(villa[3][0][0], days[0][1]), ('Количество суток:', (days[0][1] - villa[3][0][0]).days)]
+                        villa[3] = days
+                        flag = True
+                        break 
                 if part_month == 'end_month:' and number == days[1][1] and (days[0][0].month - month_villa == 1 or days[0][0].month - month_villa == -11) and villa[0] == categ:
                     days = [(villa[3][0][0], days[0][1]), ('Количество суток:', (days[0][1] - villa[3][0][0]).days)]
                     villa[3] = days

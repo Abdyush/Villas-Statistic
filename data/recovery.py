@@ -71,14 +71,13 @@ def separate_butler(cmt, other_comments):
 
 # Совершенная версия определения периода проживания виллы
 def perfect_count_days(sheets, index_sheet, category, number_row, number_column, index_sheets, number_villa):
-
+    
     # Определяем год
     if index_sheets == 0 and index_sheet <= 11:
-        year = 2023
+        year = datetime.today().year - 1
     elif index_sheets == 1 and index_sheet <= 11 or (index_sheets == 0 and index_sheet == 12):
-        year = 2024
-    elif index_sheets == 2 or (index_sheets == 1 and index_sheet == 12):
-        year = 2025
+        year = datetime.today().year
+    
 
     # Определяем месяц
     if index_sheet == 12:
@@ -155,10 +154,7 @@ def determine_rate(cell):
 # Функция определяющая номер виллы
 def define_number_villa(index_sheet, category, number_row, index_sheets, sheet):
     # Определяем номер столбца
-    if index_sheet == 11 and index_sheets == 0:
-        col = 0
-    else:
-        col = 1
+    col = 1
     # Определяем номер ряда
     row = int(str(category[number_row][0].coordinate)[1:])
     # Извлекаем номер виллы

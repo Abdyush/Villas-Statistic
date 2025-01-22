@@ -8,12 +8,13 @@ import flet as ft
 import openpyxl
 from data.collection import new_month_statistic, butlers, perfect_new_month_statistic, fill_dict
 from data.data_output import new_fill_first_table, new_fill_second_table
-from data.processing import new_prepare_dict, new_new_count_totals
+from data.processing import new_prepare_dict, new_new_count_totals, coef_new_count_totals
 from copy_file import copy_file_to_folder
 
 def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.DARK
     page.title = 'Villas Statistic'
+
 #------------------------------------------------------ПЕРВАЯ СТРАНИЦА---------------------------------------------------------------------
     def first_page():
         page.clean()
@@ -174,7 +175,8 @@ def main(page: ft.Page):
                 os.remove(FILE_PATH)
                 os.remove(FILE_24_PATH)
 
-                generaly_dictionary = new_new_count_totals(butlers)
+                generaly_dictionary = coef_new_count_totals(butlers)
+                print(generaly_dictionary)
 
                 # open a pickle file
                 filename = 'selected_butlers.pk'
@@ -195,21 +197,20 @@ def main(page: ft.Page):
                     file_stat.remove(file_stat[sh])
 
                 # Создаем листы "Все виллы", "Статистика"
-                sheet = file_stat.create_sheet("Все виллы")
-                sheet1 = file_stat.create_sheet("Статистика")
-
-                # Заполняем первую таблицу всеми данными по виллам
-                new_fill_first_table(sheet, dict(sorted(butlers.items())))
+                sheet = file_stat.create_sheet("Статистика")
+                sheet1 = file_stat.create_sheet("Все виллы")
 
                 # Заполняем вторую таблицу статистикой
-                new_fill_second_table(sheet1, generaly_dictionary)
+                new_fill_second_table(sheet, generaly_dictionary)
+
+                # Заполняем первую таблицу всеми данными по виллам
+                new_fill_first_table(sheet1, dict(sorted(butlers.items())))
 
                 # Выводим в терминал "Готово!", сохраняем и закрываем файл
                 
                 print('Готово!')
                 file_stat.save(STATISTIC_FILE_PATH)
                 file_stat.close()
-                
                 result.color = 'green'
                 result.value = 'ГОТОВО!'
                 btn.visible = False
@@ -239,9 +240,13 @@ def main(page: ft.Page):
 
 
         def start_programm(e):
+            pb.visible = True
+            btn.disabled = True
             file_1 = paths['one']
             file_2 = paths['two']
             main_work(e, file_1, file_2)
+            pb.visible = False
+            btn.disabled = False
             open_file_btn.visible = True
             page.update()
             
@@ -250,36 +255,44 @@ def main(page: ft.Page):
 
         #---------------------------------------------------------Кнопки------------------------------------------------------------------
         # Кнопка перехода к настройкам
-        settings_btn = ft.ElevatedButton("Настройки", icon=ft.Icons.SETTINGS, width=200, height=45, on_click=switch_to_second_page)
+        settings_btn = ft.ElevatedButton("Настройки", icon=ft.Icons.SETTINGS, width=200, height=45, on_click=switch_to_second_page,
+                                        style=ft.ButtonStyle(text_style=ft.TextStyle(size=17)))
 
         # Текст с результатом выполнения программы
         result = ft.Text(value="", theme_style=ft.TextThemeStyle.TITLE_MEDIUM, color="green")
 
         # Текстовые элементы для отображения статуса выбранного файла
-        file_path_label_1 = ft.Text(value="", expand=1)
-        file_path_label_2 = ft.Text(value="", expand=1)
+        file_path_label_1 = ft.Text(value="", expand=1, size=17)
+        file_path_label_2 = ft.Text(value="", expand=1, size=17)
 
         # Создаем filpickers - элементы управления для выбора файла
         filepicker_1 = ft.FilePicker(on_result=return_first_file)
         filepicker_2 = ft.FilePicker(on_result=return_second_file)
         
         # Кнопки для выбора файла
-        select_button_1 = ft.ElevatedButton(text="Occupancy за прошлый год", icon=ft.Icons.UPLOAD, width=300, height=45, on_click=select_first_file)
-        select_button_2 = ft.ElevatedButton(text="Occupancy за текущий год", icon=ft.Icons.UPLOAD, width=300, height=45, on_click=select_second_file)
+        select_button_1 = ft.ElevatedButton(text="Occupancy за прошлый год", icon=ft.Icons.UPLOAD, width=300, height=45, on_click=select_first_file,
+                                            style=ft.ButtonStyle(text_style=ft.TextStyle(size=17)))
+        select_button_2 = ft.ElevatedButton(text="Occupancy за текущий год", icon=ft.Icons.UPLOAD, width=300, height=45, on_click=select_second_file,
+                                            style=ft.ButtonStyle(text_style=ft.TextStyle(size=17)))
 
         # Кнопки подтверждения
-        confirm_button_1 = ft.IconButton(icon=ft.Icons.CHECK, width=100, height=45, on_click=confirm_file_1, visible=False)
-        confirm_button_2 = ft.IconButton(icon=ft.Icons.CHECK, width=100, height=45, on_click=confirm_file_2, visible=False)
+        confirm_button_1 = ft.IconButton(icon=ft.Icons.CHECK, width=70, height=45, on_click=confirm_file_1, visible=False)
+        confirm_button_2 = ft.IconButton(icon=ft.Icons.CHECK, width=70, height=45, on_click=confirm_file_2, visible=False)
 
         # Кнопки отмены файла
         cancel_button_1 = ft.IconButton(icon=ft.Icons.CANCEL, width=100, height=45, on_click=cancel_file_1, visible=False)
         cancel_button_2 = ft.IconButton(icon=ft.Icons.CANCEL, width=100, height=45, on_click=cancel_file_2, visible=False)
 
         # Кнопка "Запуск"
-        btn = ft.ElevatedButton(text='Запуск', icon=ft.Icons.ROCKET_LAUNCH_SHARP, width=400, height=55, on_click=start_programm, disabled=True)
+        btn = ft.ElevatedButton(text='Запуск', icon=ft.Icons.DOUBLE_ARROW_OUTLINED, width=400, height=55, on_click=start_programm, 
+                                style=ft.ButtonStyle(text_style=ft.TextStyle(size=17)), disabled=True)
         
         # Кнопка открытия файла со статистикой
-        open_file_btn = ft.FilledButton(text='Открыть файл со статистикой', icon=ft.Icons.FILE_OPEN_ROUNDED, width=300, height=45, on_click=open_stat_file, visible=False)
+        open_file_btn = ft.FilledButton(text='Открыть статистику', icon=ft.Icons.FILE_OPEN_ROUNDED, width=300, height=45, 
+                                        on_click=open_stat_file, style=ft.ButtonStyle(text_style=ft.TextStyle(size=17)), visible=False)
+        
+
+        pb = ft.ProgressBar(width=400, visible=False)
         
 
         #------------------------------------------------Ряды и контейнеры-----------------------------------------------------------------
@@ -288,6 +301,7 @@ def main(page: ft.Page):
         
         # Второй ряд содержит колонку, внутри которой первым рядом идет кнопка запуска, вторым - текст с результатом и кнопка открытия файла
         second_row = ft.Row(controls=[ft.Column(controls=[btn,
+                                                          pb,
                                                           ft.Row(controls=[result, open_file_btn])],
                                                           alignment=ft.MainAxisAlignment.END)],
                                                 height=350,
@@ -354,7 +368,8 @@ def main(page: ft.Page):
             # Создаем строку с именем сотрудника и чекбоксом
             checkbox = ft.Checkbox(label="", value=False, visible=False)
             text_field = ft.TextField(value=name, width=200, on_change=lambda e: update_employee_name(e, row), disabled=True, 
-                                color = ft.Colors.with_opacity(1, ft.Colors.PRIMARY), text_align=ft.TextAlign.CENTER) 
+                                      color = ft.Colors.with_opacity(1, ft.Colors.PRIMARY), text_align=ft.TextAlign.CENTER, 
+                                      text_style=ft.TextStyle(size=17))
             del_icon = ft.IconButton(ft.Icons.DELETE, on_click=lambda e: delete_employee(row, shift_column), visible=False)
             row = ft.Row(controls=[text_field, checkbox, del_icon], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
             list_textfields.append(text_field)
@@ -433,6 +448,7 @@ def main(page: ft.Page):
             page.update()
 
         def confirm_selection(e):
+            nonlocal list_textfields 
             # Подтверждаем выбор сотрудников с галочками
             selected_first_shift = []
             selected_second_shift = []
@@ -450,9 +466,8 @@ def main(page: ft.Page):
             with open(filename2, 'wb') as fi:
             # dump your data into the file
                 pickle.dump(sel_but, fi)
-            print("Выбранные сотрудники:", selected_first_shift) 
-            print("Выбранные сотрудники:", selected_second_shift)
-            all_selected = ", ".join(selected_first_shift + selected_second_shift)
+        
+            list_all_selected = selected_first_shift + selected_second_shift
 
             confirm_selection_button.visible = False
             cancel_selection_btn.visible = False
@@ -460,7 +475,13 @@ def main(page: ft.Page):
             enable_button.visible = True
             for checkbox in list_checkboxes:
                 checkbox.visible = False
-            individual_stat.value = f'Программа посчитает статистику для следующих батлеров: {all_selected}'
+            individual_stat.value = f'Программа посчитает статистику для выделенных батлеров'
+            for butler in list_all_selected:
+                for field in list_textfields:
+                    if butler == field.value:
+                        field.bgcolor=ft.Colors.LIGHT_BLUE_500
+            enable_button.visible = False
+            select_individual_btn.visible = False
 
             page.update()
 
@@ -469,7 +490,8 @@ def main(page: ft.Page):
 
         #---------------------------------------------------------Кнопки----------------------------------------------------------------------
         # Кнопка для возвращения к подсчету статистики
-        count_stat_btn = ft.ElevatedButton("Подсчет статистики", on_click=switch_to_first_page)
+        count_stat_btn = ft.ElevatedButton("Подсчет статистики", icon=ft.Icons.FORMAT_LIST_NUMBERED, width=250, height=45, on_click=switch_to_first_page,
+                                           style=ft.ButtonStyle(text_style=ft.TextStyle(size=17)))
 
         # Поле для ввода фамилии сотрудника
         employee_input = ft.TextField(label="Добавьте нового сотрудника", width=300, visible=False)
@@ -479,41 +501,35 @@ def main(page: ft.Page):
         add_second_shift_button = ft.IconButton(ft.Icons.ADD, on_click=lambda e: add_employee(second_shift_list), visible=False)
 
         # Кнопка для включения всех TextField
-        enable_button = ft.ElevatedButton(
-            text="Включить редактирование",
-            on_click=lambda e: enable_text_fields()
-        )
+        enable_button = ft.ElevatedButton(text="Внести изменения", width=310, height=50, icon=ft.Icons.EDIT_OUTLINED,
+            on_click=lambda e: enable_text_fields(), style=ft.ButtonStyle(
+            text_style=ft.TextStyle(size=17)) )
+        
         # Кнопка подтверждения изменений
-        confirm_button = ft.Button(text="Подтвердить изменения", on_click=confirm_changes, visible=False)
+        confirm_button = ft.Button(text="Подтвердить изменения", width=250, height=45, icon=ft.Icons.CHECK, 
+                                   on_click=confirm_changes, visible=False)
         # Кнопка отмены изменений
-        cancel_button = ft.Button(text="Отменить изменения", on_click=lambda e: cancel_selection(), visible=False)
+        cancel_button = ft.Button(text="Отменить изменения", width=250, height=45, icon=ft.Icons.CANCEL, 
+                                  on_click=lambda e: cancel_selection(), visible=False)
         
         # Кнопка для выбора отдельных батлеров
-        select_individual_btn = ft.Button(text='Выбрать отдельных батлеров',
-                                          tooltip="Нажмите, для просмотра статистики отдельных батлеров",
-                                          on_click=lambda e: show_checkboxes())
+        select_individual_btn = ft.Button(text='Выбрать отдельных батлеров', width=310, height=50, icon=ft.Icons.CHECK_BOX_OUTLINED, 
+                                          on_click=lambda e: show_checkboxes(), style=ft.ButtonStyle(
+                                          text_style=ft.TextStyle(size=17)))
         # Кнопка подтверждения выбора
-        confirm_selection_button = ft.Button(text="Выбрать данных батлеров",  
+        confirm_selection_button = ft.Button(text="Выбрать данных батлеров", width=250, height=45, icon=ft.Icons.CHECK,  
                                             on_click=confirm_selection,
                                             visible=False)
         # Кнопка отмены выбора отдельных батлеров 
-        cancel_selection_btn = ft.Button(text="Отменить выбор",  
+        cancel_selection_btn = ft.Button(text="Отменить выбор", width=250, height=45, icon=ft.Icons.CANCEL, 
                                             on_click=lambda e:cancel_selection(),
                                             visible=False)
         # Текст с выбранными батлерами
-        individual_stat = ft.Text("")
+        individual_stat = ft.Text("", size=18)
+
 
         # Заполняем начальные данные
         populate_employee_lists(first_shift, second_shift)
-
-        #page.add(ft.Row(controls=[select_individual_btn, confirm_selection_button, cancel_selection_btn, individual_stat]))
-
-        # Добавляем элементы на страницу
-        #page.add(
-            #ft.Row(controls=[
-                #ft.Column(controls=[ft.Text("Первая смена"), first_shift_list, employee_input, add_first_shift_button]),
-                #ft.Column(controls=[ft.Text("Вторая смена"), second_shift_list, add_second_shift_button])
-            #]))
 
 
         #-------------------------------------------------------Ряды и контейнеры-------------------------------------------------------------
@@ -527,7 +543,8 @@ def main(page: ft.Page):
         # Третий ряд содержит три колонки, по бокам - списки сотрудников, по середине - кнопки
         buttons_column = ft.Column(controls=[ft.Row(controls=[enable_button, cancel_button, confirm_button]),
                                              ft.Row(controls=[add_first_shift_button, employee_input, add_second_shift_button]),
-                                             ft.Row(controls=[select_individual_btn, cancel_selection_btn, confirm_selection_button])],
+                                             ft.Row(controls=[select_individual_btn, cancel_selection_btn, confirm_selection_button]),
+                                             individual_stat],
                                              height=300,
                                              alignment=ft.MainAxisAlignment.END,
                                              horizontal_alignment=ft.CrossAxisAlignment.CENTER,

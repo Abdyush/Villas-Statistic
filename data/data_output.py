@@ -134,7 +134,7 @@ def new_fill_second_table(sheet1, general_dictionary):
 
     # Заполняем таблицу статистикой
     rows = []
-    for j in range(1, 22):
+    for j in range(1, 23):
         sheet1.cell(4, j).fill = PatternFill('solid', fgColor='E0E0E0')
     row = 5
     col = 1
@@ -160,7 +160,7 @@ def new_fill_second_table(sheet1, general_dictionary):
                         cell.value = value
                         cell.alignment = Alignment(horizontal="center", vertical="center")
                         cell.font = Font(name='Arial', size=12)
-                        if col == 8 or col == 12 or col == 14 or col == 15 or col == 17 or col == 21 or col == 2 or col == 3:
+                        if col == 8 or col == 12 or col == 14 or col == 15 or col == 16 or col == 22 or col == 2 or col == 3:
                             cell.border = Border(top=thin, right=thin, bottom=thin)
                         else:
                             cell.border = Border(top=thin, bottom=thin)
@@ -172,10 +172,10 @@ def new_fill_second_table(sheet1, general_dictionary):
         rows.append(end_range)
         row += 1
 
-    for j in range(1, 22):
+    for j in range(1, 23):
         sheet1.cell(rows[0], j).fill = PatternFill('solid', fgColor='E0E0E0')
-    ran1 = f'A4:U{rows[0] - 1}'
-    ran2 = f'A{rows[0]}:U{row}'
+    ran1 = f'A4:V{rows[0] - 1}'
+    ran2 = f'A{rows[0]}:V{row}'
     tab = Table(displayName='Table1', ref=ran1)
     style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
                        showLastColumn=False, showRowStripes=True, showColumnStripes=True)
