@@ -222,21 +222,16 @@ def new_new_count_totals(butlers):
 
 # Функция подсчета итогов с подсчетом количества суток за сезон
 def coef_new_count_totals(butlers):
-    #first_shift = ['Булгаков', 'Волгузов', 'Волков', 'Гетало', 'Гончар', 'Дембицкий', 'Диденко', 'Ларионов', 'Онищук', 'Орлов', 
-    #'Ляшов', 'Сергеев', 'Тараев']
-
-    #second_shift = ['Абдюшев', 'Люфт', 'Макухин', 'Мартынов', 'Марченко', 'Нечипуренко', 'Старенький', 'Стибельский', 'Тарабанов', 
-    #'Федоренко', 'Черноштан', 'Шаповалов']
-
+   
      # open a pickle file
     filename1 = 'all_butlers.pk'
     filename2 = 'selected_butlers.pk'
 
     # Определяем баллы категорям для подсчета коэфицента
     points_category = {'VEG': 1,
-                       'FWV': 1.5,
+                       'FWV': 1,
                        'PWV': 2,
-                       'VPS': 2.5,
+                       'VPS': 2,
                        'VIG': 3}
     
     # Определяем баллы за тарифы
@@ -306,7 +301,7 @@ def coef_new_count_totals(butlers):
         for time, guests in villas.items():
             for guest, info in guests.items():
                 for iterance in info:
-                    coef = 0
+                    coef = 1
                     if time == 'present':
                         arrival = iterance[3][0][0]
                         check_out = iterance[3][0][1]
@@ -324,7 +319,6 @@ def coef_new_count_totals(butlers):
                             period_days = count_total_period_days(arrival=arrival, check_out=check_out, start_period=start_period, 
                                                                   end_period=end_period, villa_days=iterance[3][1][1], shift=shf)
                             
-                            coef += period_days
 
                             # Определяем балл за категорию
                             for categ, point in points_category.items():

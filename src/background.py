@@ -1,3 +1,4 @@
+import pickle
 from openpyxl.cell import MergedCell
 from openpyxl.styles import Font, PatternFill
 from openpyxl.styles import Alignment
@@ -6,6 +7,37 @@ from data.processing import detrmine_season
 
 
 # ------------------------ ПОДГОТОВИТЕЛЬНЫЕ ФУНКЦИИ -----------------------------------------
+
+# Функция определяющая текущих батлеров, и формирующая список всех когда либо работающих
+def prepare_lists_butlers():
+    # open a pickle file
+    filename = 'all_time_butlers.pk'
+    filename1 = 'all_butlers.pk'
+    filename2 = 'selected_butlers.pk'
+
+    # load your data back to memory when you need it
+    with open(filename2, 'rb') as fi:
+        sel_but = pickle.load(fi)
+
+    if sel_but != []:
+        present_butlers = sel_but[0]
+        present_butlers.extend(sel_but[1])
+    else:
+        with open(filename1, 'rb') as fi:
+            all_but = pickle.load(fi)
+        present_butlers = all_but[0]
+        present_butlers.extend(all_but[1])
+        with open(filename, 'rb') as file:
+            all_butlers = pickle.load(file)
+            all_butlers = sorted(list(set(present_butlers) | set(all_butlers)))
+        with open(filename, 'wb') as file:
+            pickle.dump(all_butlers, file)
+            print(all_butlers)
+
+    with open(filename, 'rb') as fi:
+        all_butlers = pickle.load(fi)
+
+    return present_butlers, all_butlers
 
 # Функция, определяющая диапазоны категорий вилл для отдельной страницы
 def define_range(sheet_):

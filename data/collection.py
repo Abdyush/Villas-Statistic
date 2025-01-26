@@ -1,6 +1,6 @@
 from datetime import datetime
 import pickle
-from data.recovery import separate_butler, determine_rate, perfect_count_days, define_number_villa, process_name_guest, determine_category
+from data.recovery import separate_butler, determine_rate, perfect_count_days, define_number_villa, process_name_guest, determine_category, new_separate_butler
 from src.background import perfect_perfect_define_range
 
 
@@ -9,6 +9,9 @@ from src.background import perfect_perfect_define_range
 # Создаем словарь с будущей статистикой батлеров
 
 butlers = {}
+
+def clean_butlers(butlers):
+    butlers.clear()
 
 def fill_dict(butlers):
     # open a pickle file
@@ -153,21 +156,20 @@ def new_month_statistic(sheets, sheet, sheet_index, sheets_index):
 
 
 # Функция получения статистики месяца с учетом времени заезда виллы (совершенная)
-def perfect_new_month_statistic(sheets, sheet, sheet_index, sheets_index):
+def perfect_new_month_statistic(sheets, sheet, sheet_index, sheets_index, present_butlers, all_butlers):
     reference_date = datetime.today()
     diap = sheet.calculate_dimension()
     diapazone = sheet[diap]
-
-
+    
     for row in diapazone:
         for column in range(len(row)):
             if row[column].value != None:
                 try:
                     cmt = row[column].comment.text
-                    if separate_butler(cmt, other_comments) == None:
+                    if new_separate_butler(cmt, other_comments, present_butlers, all_butlers) == None:
                         continue
                     else:
-                        shift, but = separate_butler(cmt, other_comments)
+                        shift, but = new_separate_butler(cmt, other_comments, present_butlers, all_butlers)
                         guest = process_name_guest(name=row[column].value)                       
                                         
                         rate = determine_rate(row[column])                         

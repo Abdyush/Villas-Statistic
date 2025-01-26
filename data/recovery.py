@@ -7,35 +7,8 @@ from datetime import datetime, timedelta
 # ------------------ФУНКЦИИ ИЗВЛЕЧЕНИЯ ПАРАМЕТРОВ ИЗ ОККУПАНСИ------------------------------------
 
 # Извлечение фамилии батлера из комментария ячейки
-def separate_butler(cmt, other_comments):
-    all_butlers = ['Булгаков', 'Волгузов', 'Волков', 'Гетало', 'Гончар', 'Дембицкий', 'Диденко', 'Ларионов', 'Онищук', 'Орлов', 
-    'Ляшов', 'Сергеев', 'Тараев', 'Абдюшев', 'Люфт', 'Макухин', 'Мартынов', 'Марченко', 'Нечипуренко', 'Старенький', 'Стибельский', 'Тарабанов', 
-    'Федоренко', 'Черноштан', 'Шаповалов', 'Царенков', 'Потапов', 'Доронин', 'Мантуров', 'Саетов', 
-    'Солодаев', 'Календжян', 'Буркеев', 'Карманов', 'Салединов', 'Тлашадзе', 'Соловьев', 'Дейнекин', 
-    'Лесников', 'Гончаров', 'Попов', 'Пак', 'Курилко', 'Росихин']
+def separate_butler(cmt, other_comments, present_butlers, all_butlers):
     
-    #present_butlers = ['Булгаков', 'Волгузов', 'Волков', 'Гетало', 'Гончар', 'Дембицкий', 'Диденко', 'Онищук', 'Орлов', 
-    #'Ляшов', 'Сергеев', 'Тараев', 'Абдюшев', 'Люфт', 'Макухин', 'Мартынов', 'Марченко', 'Нечипуренко', 'Стибельский', 'Тарабанов', 
-    #'Федоренко', 'Черноштан', 'Шаповалов']
-
-    # open a pickle file
-    filename1 = 'all_butlers.pk'
-    filename2 = 'selected_butlers.pk'
-    
-    
-    # load your data back to memory when you need it
-    with open(filename2, 'rb') as fi:
-        sel_but = pickle.load(fi)
-
-    if sel_but != []:
-        present_butlers = sel_but[0]
-        present_butlers.extend(sel_but[1])
-    else:
-        with open(filename1, 'rb') as fi:
-            all_but = pickle.load(fi)
-        present_butlers = all_but[0]
-        present_butlers.extend(all_but[1])
-
     but = []
     butler = []
     # Убираем лишнее из комментария
@@ -46,6 +19,40 @@ def separate_butler(cmt, other_comments):
 
     for name in all_butlers:
         if (name == 'Федоренко' and name.lower() in cmt.lower() and 'Н' in cmt) or ((name == 'Мартынов' and name.lower() in cmt.lower()) and 'Л' in cmt or 'Алексей' in cmt):
+            continue
+        else: 
+            if name.lower() in cmt.lower():
+                if name == 'Солодаев':
+                    name = 'Ляшов'
+                but.append(name)
+    if but == []:
+        other_comments.append(cmt)
+    else:
+      shift = len(but)
+      if shift == 1:
+         shift = 'Один'
+      elif shift > 1:
+         shift = '2/2'
+     
+      
+      for name in present_butlers:
+         if name in but:
+            butler.append(name)
+    if len(butler) > 0:
+        return shift, butler
+
+# Совершенная функция извлечения фамилии батлеров    
+def new_separate_butler(cmt, other_comments, present_butlers, all_butlers):
+    
+    but = []
+    butler = []
+    if 'Мартынов С' in cmt:
+        print('ss')
+    
+    for name in all_butlers:
+        if name == 'Федоренко' and name.lower() in cmt.lower() and 'Н' in cmt:
+            continue
+        elif name == 'Мартынов' and name.lower() in cmt.lower() and ('Мартынов С' not in cmt and 'Мартынов Александр' not in cmt and 'Мартынов Саша' not in cmt):
             continue
         else: 
             if name.lower() in cmt.lower():
