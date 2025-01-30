@@ -1,9 +1,12 @@
+import os
+import sys
 import pickle
 from openpyxl.cell import MergedCell
 from openpyxl.styles import Font, PatternFill
 from openpyxl.styles import Alignment
 from openpyxl.styles import Border, Side
 from data.processing import detrmine_season
+from src.resource import resource_path
 
 
 # ------------------------ ПОДГОТОВИТЕЛЬНЫЕ ФУНКЦИИ -----------------------------------------
@@ -11,9 +14,17 @@ from data.processing import detrmine_season
 # Функция определяющая текущих батлеров, и формирующая список всех когда либо работающих
 def prepare_lists_butlers():
     # open a pickle file
-    filename = 'all_time_butlers.pk'
-    filename1 = 'all_butlers.pk'
-    filename2 = 'selected_butlers.pk'
+    #filename = 'all_time_butlers.pk'
+    #filename1 = 'all_butlers.pk'
+    #filename2 = 'selected_butlers.pk'
+
+    #filename = os.path.realpath('butlers/all_time_butlers.pk')
+    #filename1 = os.path.realpath('butlers/all_butlers.pk')
+    #filename2 = os.path.realpath('butlers/selected_butlers.pk')
+
+    filename = resource_path('butlers/all_time_butlers.pk')
+    filename1 = resource_path('butlers/all_butlers.pk')
+    filename2 = resource_path('butlers/selected_butlers.pk')
 
     # load your data back to memory when you need it
     with open(filename2, 'rb') as fi:
@@ -269,6 +280,9 @@ def prepare_second_table(sheet1):
                 cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
 
     set_border(sheet1, 'A1:V3') 
+
+
+
 
 
 

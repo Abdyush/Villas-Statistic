@@ -11,6 +11,7 @@ from data.data_output import new_fill_first_table, new_fill_second_table
 from data.processing import new_prepare_dict, coef_new_count_totals
 from src.copy_file import copy_file_to_folder
 from src.background import prepare_lists_butlers
+from src.resource import resource_path
 
  # Переменные для хранения путей к файлам
 file_path_1 = ""
@@ -176,7 +177,7 @@ def main(page: ft.Page):
                 generaly_dictionary = coef_new_count_totals(butlers)
 
                 # open a pickle file
-                filename = 'selected_butlers.pk'
+                filename = resource_path('butlers/selected_butlers.pk')
 
                 with open(filename, 'wb') as fi:
                     # dump your data into the file
@@ -184,7 +185,8 @@ def main(page: ft.Page):
 
                 # Путь к файлу со статистикой
                 #STATISTIC_FILE_PATH = '/home/user/Рабочий стол/StudyProject/villas/Statistic/Butlers_statistic.xlsx'
-                STATISTIC_FILE_PATH = os.path.realpath('Statistic/Butlers_statistic.xlsx')
+                #STATISTIC_FILE_PATH = os.path.realpath('Statistic/Butlers_statistic.xlsx')
+                STATISTIC_FILE_PATH = resource_path('Statistic/Butlers_statistic.xlsx')
 
                 # Открываем файл cо статистикой
                 file_stat = openpyxl.load_workbook(STATISTIC_FILE_PATH)
@@ -231,13 +233,14 @@ def main(page: ft.Page):
 
         def open_stat_file(e):
             # Путь к файлу Excel
-            STATISTIC_FILE_PATH = os.path.realpath('Statistic/Butlers_statistic.xlsx')
+            #STATISTIC_FILE_PATH = os.path.realpath('Statistic/Butlers_statistic.xlsx')
+            STATISTIC_FILE_PATH = resource_path('Statistic/Butlers_statistic.xlsx')
 
             # Открываем файл с помощью Excel (Windows)
-            # os.startfile(STATISTIC_FILE_PATH)
+            os.startfile(STATISTIC_FILE_PATH)
 
             # Или с помощью subprocess (для Linux)
-            subprocess.Popen(['xdg-open', STATISTIC_FILE_PATH])
+            #subprocess.Popen(['xdg-open', STATISTIC_FILE_PATH])
             first_page()  
 
 
@@ -363,8 +366,15 @@ def main(page: ft.Page):
         page.scroll = ft.ScrollMode.ALWAYS
         
             # open a pickle file
-        filename1 = 'all_butlers.pk'
-        filename2 = 'selected_butlers.pk'
+        #filename1 = 'all_butlers.pk'
+        #filename1 = os.path.realpath('butlers/all_butlers.pk')
+        #filename2 = 'selected_butlers.pk'
+        #filename2 = os.path.realpath('butlers/selected_butlers.pk')
+
+        filename1 = resource_path('butlers/all_butlers.pk')
+        filename2 = resource_path('butlers/selected_butlers.pk')
+
+
         list_textfields = []
         list_del_icons = []
         list_checkboxes = []

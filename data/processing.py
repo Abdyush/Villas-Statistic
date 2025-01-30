@@ -1,7 +1,9 @@
+import os
 from datetime import datetime
 import calendar
 import locale
 import pickle
+from src.resource import resource_path
 
 
 # Устанавливаем Русскую локализацию для datetime
@@ -75,8 +77,11 @@ def new_new_count_totals(butlers):
     #'Федоренко', 'Черноштан', 'Шаповалов']
 
      # open a pickle file
-    filename1 = 'all_butlers.pk'
-    filename2 = 'selected_butlers.pk'
+    #filename1 = os.path.realpath('butlers/all_butlers.pk')
+    #filename2 = os.path.realpath('butlers/selected_butlers.pk')
+
+    filename1 = resource_path('butlers/all_butlers.pk')
+    filename2 = resource_path('butlers/selected_butlers.pk')
     
     
     # load your data back to memory when you need it
@@ -224,8 +229,11 @@ def new_new_count_totals(butlers):
 def coef_new_count_totals(butlers):
    
      # open a pickle file
-    filename1 = 'all_butlers.pk'
-    filename2 = 'selected_butlers.pk'
+    #filename1 = os.path.realpath('butlers/all_butlers.pk')
+    #filename2 = os.path.realpath('butlers/selected_butlers.pk')
+
+    filename1 = resource_path('butlers/all_butlers.pk')
+    filename2 = resource_path('butlers/selected_butlers.pk')
 
     # Определяем баллы категорям для подсчета коэфицента
     points_category = {'VEG': 1,

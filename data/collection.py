@@ -1,7 +1,9 @@
+import os
 from datetime import datetime
 import pickle
 from data.recovery import separate_butler, determine_rate, perfect_count_days, define_number_villa, process_name_guest, determine_category, new_separate_butler
 from src.background import perfect_perfect_define_range
+from src.resource import resource_path
 
 
 # ------------------------------ ОСНОВНЫЕ ФУНКЦИИ ---------------------------------------------
@@ -15,8 +17,11 @@ def clean_butlers(butlers):
 
 def fill_dict(butlers):
     # open a pickle file
-    filename1 = 'all_butlers.pk'
-    filename2 = 'selected_butlers.pk'
+    #filename1 = os.path.realpath('butlers/all_butlers.pk')
+    #filename2 = os.path.realpath('butlers/selected_butlers.pk')
+
+    filename1 = resource_path('butlers/all_butlers.pk')
+    filename2 = resource_path('butlers/selected_butlers.pk')
     
     
     # load your data back to memory when you need it

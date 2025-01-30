@@ -1,5 +1,4 @@
 import re
-import pickle
 from openpyxl.cell import MergedCell
 from datetime import datetime, timedelta
 
@@ -46,9 +45,6 @@ def new_separate_butler(cmt, other_comments, present_butlers, all_butlers):
     
     but = []
     butler = []
-    if 'Мартынов С' in cmt:
-        print('ss')
-    
     for name in all_butlers:
         if name == 'Федоренко' and name.lower() in cmt.lower() and 'Н' in cmt:
             continue
